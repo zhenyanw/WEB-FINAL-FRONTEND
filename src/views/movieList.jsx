@@ -1,38 +1,25 @@
 import React, { useState, useEffect } from "react";
 import PageBase from "../components/pageBase.jsx";
 import { useParams } from "react-router-dom";
-import { Row, Col } from "react-bootstrap";
 import Axios from "axios";
-import { makeStyles, ButtonBase } from "@material-ui/core";
+import { makeStyles, Container, Grid } from "@material-ui/core";
 import MovieCard from "../components/movieCard.jsx";
-import Movie from "./movie.jsx";
 
 const useStyles = makeStyles((theme) => ({
   column: {
     marginBottom: 20,
+  },
+  cardGrid: {
+    paddingTop: theme.spacing(8),
+    paddingBottom: theme.spacing(8),
   },
 }));
 
 function MovieList() {
   const params = useParams();
   const searchValue = params.searchValue;
-
-  const [movieSelected, setMovieSelected] = useState(null);
   const [movies, setMovies] = useState([]);
   const classes = useStyles();
-
-  function handleClick(e, movie) {
-    e.preventDefault();
-    setMovieSelected(movie);
-  }
-
-  const movieColumns = movies
-    ? movies.map((movie, index) => (
-        <Col classe={classes.column} key={index} xs={12} sm={4} md={3} lg={3}>
-          <MovieCard movie={movie} />
-        </Col>
-      ))
-    : null;
 
   useEffect(() => {
     Axios.get(
@@ -50,12 +37,7 @@ function MovieList() {
       .catch((error) => console.log(error));
   }, []);
 
-  if (movieSelected != null) {
-    console.log(movieSelected);
-    return <Movie movie={movieSelected} />;
-  }
-
-  if (movies.length === 0) {
+  if (movies == null || movies.length === 0) {
     return (
       <PageBase>
         <div>No Movies Found</div>
@@ -64,7 +46,16 @@ function MovieList() {
   }
   return (
     <PageBase>
-      <Row>{movieColumns}</Row>
+      <Container className={classes.cardGrid} maxWidth="md">
+        {/* End hero unit */}
+        <Grid container spacing={4}>
+          {movies.map((movie, index) => (
+            <Grid item key={index} xs={12} sm={6} md={4}>
+              <MovieCard movie={movie} />
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
     </PageBase>
   );
 }

@@ -2,16 +2,12 @@ import {
   Card,
   CardMedia,
   makeStyles,
-  CardActionArea,
   CardContent,
   Typography,
   CardActions,
   Button,
-  IconButton,
 } from "@material-ui/core";
-import FavoriteIcon from "@material-ui/icons/Favorite";
-import Axios from "axios";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
@@ -19,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: 345,
   },
   media: {
-    height: 140,
+    paddingTop: "56.25%",
   },
 }));
 
@@ -42,17 +38,15 @@ function MovieCard(movie) {
 
   return (
     <Card className={classes.root}>
-      <CardActionArea>
-        <CardMedia className={classes.media} image={imgPath} title={title} />
-        <CardContent>
-          <Typography gutterBottom variant="h5" component="h2">
-            {title}
-          </Typography>
-          <Typography variant="body2" color="textSecondary" component="p">
-            {overView}
-          </Typography>
-        </CardContent>
-      </CardActionArea>
+      <CardMedia className={classes.media} image={imgPath} title={title} />
+      <CardContent>
+        <Typography noWrap gutterBottom variant="h5" component="h2">
+          {title}
+        </Typography>
+        <Typography noWrap variant="body2" color="textSecondary" component="p">
+          {overView}
+        </Typography>
+      </CardContent>
       <CardActions>
         <Button
           size="small"

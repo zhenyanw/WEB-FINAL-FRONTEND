@@ -1,11 +1,6 @@
 import {
-  Card,
-  CardMedia,
   makeStyles,
-  CardActionArea,
-  CardContent,
   Typography,
-  CardActions,
   TextField,
   Button,
   IconButton,
@@ -13,8 +8,6 @@ import {
   CssBaseline,
   Container,
   Grid,
-  ListItem,
-  List,
 } from "@material-ui/core";
 import Rating from "@material-ui/lab/Rating";
 import { useParams } from "react-router-dom";
@@ -55,6 +48,10 @@ const useStyles = makeStyles((theme) => ({
     padding: 25,
     display: "block",
   },
+  rating: {
+    display: "flex",
+    alignItems: "center",
+  },
 }));
 
 function Movie() {
@@ -66,7 +63,6 @@ function Movie() {
   const [userRating, setUserRating] = useState(0);
   const [userComment, setUserComment] = useState("");
   const [movieReviews, setMovieReviews] = useState([]);
-  const [username, setUsername] = useState(localStorage.getItem("username"));
   const [favorite, setFavorite] = useState(false);
 
   useEffect(() => {
@@ -96,7 +92,9 @@ function Movie() {
         if (response.data != null && response.data.length > 0) {
           for (let i = 0; i < response.data.length; i++) {
             list.push(response.data[i]);
-            if (response.data[i].username === username) {
+            if (
+              response.data[i].username === localStorage.getItem("username")
+            ) {
               setUserRating(response.data[i].rating);
               setUserComment(response.data[i].comment);
             }
@@ -128,18 +126,7 @@ function Movie() {
   const overView = movie?.overView ?? null;
   const date = movie?.releaseDate ?? null;
   const movieId = movie?.movieId ?? null;
-  let rating = movie?.movieTotalRating;
-
-  if (
-    rating != null &&
-    movie?.numOfPeopleRated != null &&
-    movie.numOfPeopleRated > 0
-  ) {
-    rating = rating / movie.numOfPeopleRated;
-  } else {
-    rating = movie?.externalRating ?? 0;
-  }
-
+  const rating = movie?.externalRating;
   const language = movie?.originalLanguage;
 
   if (movie == null) {
@@ -178,49 +165,57 @@ function Movie() {
 
   function findReview() {
     for (let i = 0; i < movieReviews.length; i++) {
-      if (movieReviews[i].username === username) {
-        return true;
+      if (movieReviews[i].username === localStorage.getItem("username")) {
+        return movieReviews[i].rating;
       }
     }
 
-    return false;
+    return null;
   }
 
   function onReviewSubmit(e) {
     e.preventDefault();
 
-    if (findReview()) {
+    const prevRating = findReview();
+
+    if (prevRating !== null) {
       Axios.delete(
         "https://movie-rating-server.herokuapp.com/api/movieReview",
         {
           data: {
             movieName: title,
-            username: username,
+            username: localStorage.getItem("username"),
           },
         }
       )
-        .then((response) => {})
+        .then((response) => {
+          Axios.put("https://movie-rating-server.herokuapp.com/api/movie/", {
+            movieName: title,
+            rating: 0 - prevRating,
+          });
+        })
         .catch((error) => {
           console.log(error);
         });
     }
 
     Axios.post("https://movie-rating-server.herokuapp.com/api/movieReview", {
-      username: username,
+      username: localStorage.getItem("username"),
       movieId: movieId,
       movieName: title,
       rating: userRating,
       comment: userComment,
     })
-      .then(() => {})
+      .then(() => {
+        Axios.put("https://movie-rating-server.herokuapp.com/api/movie/", {
+          movieName: title,
+          rating: userRating,
+        });
+        window.location.reload();
+      })
       .catch((error) => {
         console.log(error);
       });
-
-    Axios.put("https://movie-rating-server.herokuapp.com/api/movie/", {
-      movieName: title,
-      rating: userRating,
-    });
   }
 
   function handleFavorite(e) {
@@ -230,14 +225,13 @@ function Movie() {
         "https://movie-rating-server.herokuapp.com/api/user/favorites",
         {
           data: {
-            username: username,
+            username: localStorage.getItem("username"),
             movieName: title,
           },
         }
       )
         .then(() => {
           setFavorite(false);
-          console.log("lka");
         })
         .catch((error) => {
           console.log(error);
@@ -246,13 +240,12 @@ function Movie() {
       Axios.put(
         "https://movie-rating-server.herokuapp.com/api/user/favorites",
         {
-          username: username,
+          username: localStorage.getItem("username"),
           movieName: title,
         }
       )
         .then(() => {
           setFavorite(true);
-          console.log("ka");
         })
         .catch((error) => {
           console.log(error);
@@ -272,56 +265,116 @@ function Movie() {
             <Typography variant="body2" color="textSecondary" component="p">
               {language.toUpperCase()} | {date}
             </Typography>
-            <Typography component="legend" variant="h5">
-              {rating}
-            </Typography>
-            <Rating
-              name="read-only"
-              value={rating}
-              readOnly
-              max={10}
-              precision={0.5}
-            />
-            <Typography variant="body1" color="textSecondary" component="p">
+            <div className={classes.rating}>
+              <Rating
+                name="read-only"
+                value={rating}
+                readOnly
+                max={10}
+                precision={0.5}
+              />
+              {
+                <Box ml={1}>
+                  <Typography
+                    component="legend"
+                    variant="h5"
+                    style={{ color: "#ffc107" }}
+                  >
+                    {rating}
+                  </Typography>
+                </Box>
+              }
+            </div>
+            <Typography
+              style={{ paddingTop: 5 }}
+              variant="body1"
+              color="textSecondary"
+              component="p"
+            >
               {overView}
             </Typography>
             {inDatabase && localStorage.getItem("username") ? (
-              <IconButton
-                aria-label="add to favorites"
-                color={favorite ? "primary" : "inherit"}
-                onClick={(e) => handleFavorite(e)}
-              >
-                <FavoriteIcon />
-              </IconButton>
+              <>
+                <Typography
+                  variant="h5"
+                  component="h5"
+                  style={{ paddingTop: 50 }}
+                >
+                  Leave your thoughts
+                </Typography>
+                <div className={classes.rating}>
+                  <Typography
+                    component="legend"
+                    variant="body1"
+                    color="textSecondary"
+                  >
+                    FAVORITE THIS MOVIE:
+                  </Typography>
+                  <IconButton
+                    aria-label="add to favorites"
+                    color={favorite ? "secondary" : "#bdbdbd"}
+                    onClick={(e) => handleFavorite(e)}
+                  >
+                    <FavoriteIcon />
+                  </IconButton>
+                </div>
+              </>
             ) : null}
             {inDatabase ? (
               <></>
             ) : (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={(e) => handleAdd(e)}
-              >
-                Add to our database to review
-              </Button>
+              <div style={{ paddingTop: 50 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={(e) => handleAdd(e)}
+                >
+                  Add to our database to review
+                </Button>
+              </div>
             )}
-            {inDatabase && username != null ? (
+            {inDatabase && localStorage.getItem("username") != null ? (
               <>
-                <Typography component="legend" variant="h6">
-                  Your Rating: {userRating}
+                <Typography
+                  component="legend"
+                  variant="body1"
+                  color="textSecondary"
+                >
+                  YOUR RATING:
                 </Typography>
-                <Rating
-                  name="userRating"
-                  value={userRating}
-                  max={10}
-                  precision={0.5}
-                  onChange={(e, newValue) => {
-                    onReviewChange(e, newValue);
-                  }}
-                />
+                <div className={classes.rating}>
+                  <Rating
+                    name="userRating"
+                    value={userRating}
+                    max={10}
+                    precision={0.5}
+                    onChange={(e, newValue) => {
+                      onReviewChange(e, newValue);
+                    }}
+                  />
+                  {
+                    <Box ml={1}>
+                      <Typography
+                        component="legend"
+                        variant="h5"
+                        style={{ color: "#ffc107" }}
+                      >
+                        {userRating}
+                      </Typography>
+                    </Box>
+                  }
+                </div>
+                <Typography
+                  component="legend"
+                  variant="body1"
+                  color="textSecondary"
+                  style={{ paddingTop: 20 }}
+                >
+                  COMMENT:
+                </Typography>
                 <TextField
                   id="standard-full-width"
-                  label="Comment"
+                  label={""}
                   style={{ margin: 8 }}
                   placeholder="Leave a comment for your review"
                   fullWidth
@@ -331,15 +384,17 @@ function Movie() {
                   }}
                   onChange={(e) => onCommentChange(e)}
                 />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={(e) => {
-                    onReviewSubmit(e);
-                  }}
-                >
-                  Submit Review
-                </Button>
+                <div style={{ paddingTop: 20 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={(e) => {
+                      onReviewSubmit(e);
+                    }}
+                  >
+                    Submit Review
+                  </Button>
+                </div>
               </>
             ) : (
               <></>

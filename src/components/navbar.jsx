@@ -10,7 +10,6 @@ import {
 } from "@material-ui/core";
 import SearchBar from "material-ui-search-bar";
 import { useHistory } from "react-router-dom";
-import { Redirect } from "react-router-dom";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 
 const useStyles = makeStyles((theme) => ({
@@ -58,6 +57,7 @@ function NavBar() {
   function handleSignOut() {
     setIsSignedIn(false);
     localStorage.clear();
+    window.location.reload();
   }
 
   function onSignUpClick(e) {
@@ -80,6 +80,10 @@ function NavBar() {
       return;
     }
     history.push("/movieList" + searchValue);
+  }
+
+  function onTitleClick() {
+    history.push("/");
   }
 
   return (

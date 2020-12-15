@@ -7,9 +7,11 @@ import {
   Link,
   Grid,
   Typography,
-  Container,
+  Paper,
   Box,
   makeStyles,
+  FormControlLabel,
+  Checkbox,
 } from "@material-ui/core";
 import Alert from "@material-ui/lab/Alert";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
@@ -23,8 +25,21 @@ const INVALID_INPUT =
   "Please check your username, email and password are valid";
 
 const useStyles = makeStyles((theme) => ({
+  root: {
+    height: "100vh",
+  },
+  image: {
+    backgroundImage: "url(https://source.unsplash.com/random)",
+    backgroundRepeat: "no-repeat",
+    backgroundColor:
+      theme.palette.type === "light"
+        ? theme.palette.grey[50]
+        : theme.palette.grey[900],
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  },
   paper: {
-    marginTop: theme.spacing(8),
+    margin: theme.spacing(8, 4),
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -58,7 +73,7 @@ function SignUp() {
   const [email, setEmail] = useState(null);
 
   const [signUpSuccess, setSignUpSuccess] = useState(false);
-
+  const [isAdmin, setIsAdmin] = useState(false);
   const [signUpFailMsg, setSignUpFailMsg] = useState(null);
 
   function validateForm() {
@@ -75,7 +90,7 @@ function SignUp() {
       username: username,
       password: password,
       emailAddress: email,
-      isAdmin: false,
+      isAdmin: isAdmin,
     })
       .then((response) => {
         setSignUpSuccess(true);
@@ -94,115 +109,137 @@ function SignUp() {
     history.push("/signin");
   }
 
+  function onAdminChange(e) {
+    e.preventDefault();
+    if (e.target.checked) {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+    }
+  }
+
   return (
-    <Container component="main" maxWidth="xs">
+    <Grid container component="main" className={classes.root}>
       <CssBaseline />
-      {signUpSuccess ? (
-        <div className={classes.paper}>
-          <Typography component="h1" variant="h5">
-            Successfully signed up
-          </Typography>
-          <Button
-            type="back"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={(e) => toSignInClick(e)}
-          >
-            Go To Sign In
-          </Button>
-        </div>
-      ) : (
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign up
-          </Typography>
-          <form className={classes.form}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  autoComplete="username"
-                  name="username"
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="username"
-                  label="Username"
-                  autoFocus
-                  onChange={(e) => {
-                    setUsername(String(e.target.value));
-                    setSignUpFailMsg(null);
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  onChange={(e) => {
-                    setEmail(String(e.target.value));
-                    setSignUpFailMsg(null);
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                  onChange={(e) => {
-                    setPassword(String(e.target.value));
-                    setSignUpFailMsg(null);
-                  }}
-                />
-              </Grid>
-            </Grid>
-            {signUpFailMsg ? (
-              <Alert severity="error">{signUpFailMsg}</Alert>
-            ) : (
-              <></>
-            )}
+      <Grid item xs={false} sm={4} md={7} className={classes.image} />
+      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+        {signUpSuccess ? (
+          <div className={classes.paper}>
+            <Typography component="h1" variant="h5">
+              Successfully signed up
+            </Typography>
             <Button
-              type="submit"
+              type="back"
               fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
-              onClick={(e) => onSubmit(e)}
+              onClick={(e) => toSignInClick(e)}
             >
-              Sign Up
+              Go To Sign In
             </Button>
-            <Grid container justify="flex-end">
-              <Grid item>
-                <Link
-                  href="https://web-final-frontend.herokuapp.com/signin"
-                  variant="body2"
-                >
-                  Already have an account? Sign in
-                </Link>
+          </div>
+        ) : (
+          <div className={classes.paper}>
+            <Avatar className={classes.avatar}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Sign up
+            </Typography>
+            <form className={classes.form}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    autoComplete="username"
+                    name="username"
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="username"
+                    label="Username"
+                    autoFocus
+                    onChange={(e) => {
+                      setUsername(String(e.target.value));
+                      setSignUpFailMsg(null);
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    autoComplete="email"
+                    onChange={(e) => {
+                      setEmail(String(e.target.value));
+                      setSignUpFailMsg(null);
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    variant="outlined"
+                    required
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    type="password"
+                    id="password"
+                    autoComplete="current-password"
+                    onChange={(e) => {
+                      setPassword(String(e.target.value));
+                      setSignUpFailMsg(null);
+                    }}
+                  />
+                </Grid>
               </Grid>
-            </Grid>
-          </form>
-        </div>
-      )}
-      <Box mt={8}>
-        <Copyright />
-      </Box>
-    </Container>
+              {signUpFailMsg ? (
+                <Alert severity="error">{signUpFailMsg}</Alert>
+              ) : (
+                <></>
+              )}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    value="remember"
+                    color="primary"
+                    onChange={(e) => onAdminChange(e)}
+                  />
+                }
+                label="Sign Up As An Admin User"
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+                onClick={(e) => onSubmit(e)}
+              >
+                Sign Up
+              </Button>
+              <Grid container justify="flex-end">
+                <Grid item>
+                  <Link
+                    to="https://web-final-frontend.herokuapp.com/signin"
+                    variant="body2"
+                  >
+                    Already have an account? Sign in
+                  </Link>
+                </Grid>
+              </Grid>
+            </form>
+          </div>
+        )}
+        <Box mt={8}>
+          <Copyright />
+        </Box>
+      </Grid>
+    </Grid>
   );
 }
 

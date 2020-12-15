@@ -7,7 +7,7 @@ import {
   Link,
   Grid,
   Typography,
-  Container,
+  Paper,
   Box,
   makeStyles,
 } from "@material-ui/core";
@@ -21,8 +21,21 @@ const INCORRECT_CREDENTIAL_WARNING =
   "Please check if your username and password are correct";
 
 const useStyles = makeStyles((theme) => ({
+  root: {
+    height: "100vh",
+  },
+  image: {
+    backgroundImage: "url(https://source.unsplash.com/random)",
+    backgroundRepeat: "no-repeat",
+    backgroundColor:
+      theme.palette.type === "light"
+        ? theme.palette.grey[50]
+        : theme.palette.grey[900],
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  },
   paper: {
-    marginTop: theme.spacing(8),
+    margin: theme.spacing(8, 4),
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -103,99 +116,102 @@ function SignIn() {
   }
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Grid container component="main" className={classes.root}>
       <CssBaseline />
-      {isSignedIn ? (
-        <div className={classes.paper}>
-          <Typography component="h1" variant="h5">
-            Successfully signed in as {username}
-          </Typography>
-          <Button
-            type="back"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={(e) => backToHomeClick(e)}
-          >
-            Go To Home
-          </Button>
-        </div>
-      ) : (
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign In
-          </Typography>
-          <form className={classes.form}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  autoComplete="username"
-                  name="username"
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="username"
-                  label="Username"
-                  autoFocus
-                  onChange={(e) => {
-                    setSignInFailMsg(null);
-                    setUsername(String(e.target.value));
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                  onChange={(e) => {
-                    setSignInFailMsg(null);
-                    setPassword(String(e.target.value));
-                  }}
-                />
-              </Grid>
-            </Grid>
-            {signInFailMsg ? (
-              <Alert severity="error">{signInFailMsg}</Alert>
-            ) : (
-              <></>
-            )}
+      <Grid item xs={false} sm={4} md={7} className={classes.image} />
+      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+        {isSignedIn ? (
+          <div className={classes.paper}>
+            <Typography component="h1" variant="h5">
+              Successfully signed in as {username}
+            </Typography>
             <Button
-              type="submit"
+              type="back"
               fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
-              onClick={(e) => onSubmit(e)}
+              onClick={(e) => backToHomeClick(e)}
             >
-              Sign In
+              Go To Home
             </Button>
-            <Grid container justify="flex-end">
-              <Grid item>
-                <Link
-                  href="https://web-final-frontend.herokuapp.com/signup"
-                  variant="body2"
-                >
-                  Don't have an account? Sign up
-                </Link>
+          </div>
+        ) : (
+          <div className={classes.paper}>
+            <Avatar className={classes.avatar}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Sign In
+            </Typography>
+            <form className={classes.form}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    autoComplete="username"
+                    name="username"
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="username"
+                    label="Username"
+                    autoFocus
+                    onChange={(e) => {
+                      setSignInFailMsg(null);
+                      setUsername(String(e.target.value));
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    variant="outlined"
+                    required
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    type="password"
+                    id="password"
+                    autoComplete="current-password"
+                    onChange={(e) => {
+                      setSignInFailMsg(null);
+                      setPassword(String(e.target.value));
+                    }}
+                  />
+                </Grid>
               </Grid>
-            </Grid>
-          </form>
-        </div>
-      )}
-      <Box mt={8}>
-        <Copyright />
-      </Box>
-    </Container>
+              {signInFailMsg ? (
+                <Alert severity="error">{signInFailMsg}</Alert>
+              ) : (
+                <></>
+              )}
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+                onClick={(e) => onSubmit(e)}
+              >
+                Sign In
+              </Button>
+              <Grid container justify="flex-end">
+                <Grid item>
+                  <Link
+                    href="https://web-final-frontend.herokuapp.com/signup"
+                    variant="body2"
+                  >
+                    Don't have an account? Sign up
+                  </Link>
+                </Grid>
+              </Grid>
+            </form>
+          </div>
+        )}
+        <Box mt={8}>
+          <Copyright />
+        </Box>
+      </Grid>
+    </Grid>
   );
 }
 

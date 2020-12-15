@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   List,
   ListItem,
-  Divider,
   ListItemText,
   ListItemAvatar,
   Typography,
@@ -30,9 +29,8 @@ const useStyles = makeStyles((theme) => ({
 
 function Review({ reviews }) {
   const classes = useStyles();
-  const [dummy, setDummy] = useState(1);
 
-  function handleDelete(e, review) {
+  function handleDelete(e, review, index) {
     e.preventDefault();
 
     Axios.delete("https://movie-rating-server.herokuapp.com/api/movieReview", {
@@ -46,11 +44,15 @@ function Review({ reviews }) {
           movieName: review.movieName,
           rating: 0 - review.rating,
         });
-        setDummy(dummy + 1);
+        window.location.reload();
       })
       .catch((error) => {
         console.log(error);
       });
+  }
+
+  if (reviews.length === 0) {
+    return null;
   }
 
   return (
@@ -83,19 +85,18 @@ function Review({ reviews }) {
                   </>
                 }
               />
-              {localStorage.getItem("isAdmin") === true ? (
+              {JSON.parse(localStorage.getItem("isAdmin")) === true ? (
                 <ListItemSecondaryAction>
                   <IconButton edge="end" aria-label="delete">
                     <DeleteIcon
                       onClick={(e) => {
-                        handleDelete(e, review);
+                        handleDelete(e, review, index);
                       }}
                     />
                   </IconButton>
                 </ListItemSecondaryAction>
               ) : null}
             </ListItem>
-            <Divider />
           </React.Fragment>
         );
       })}
