@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Avatar,
   Button,
@@ -14,13 +14,11 @@ import {
 import Alert from "@material-ui/lab/Alert";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Axios from "axios";
-import Copyright from "../components/copyright.jsx";
 import { useHistory } from "react-router-dom";
+import Copyright from "../components/copyright.jsx";
 
-const USERNAME_ALREADY_USED =
-  "The username has been used, please choose another one";
-const INVALID_INPUT =
-  "Please check your username, email and password are valid";
+const INCORRECT_CREDENTIAL_WARNING =
+  "Please check if your username and password are correct";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -49,58 +47,68 @@ function validate(str) {
   return true;
 }
 
-function SignUp() {
+function SignIn() {
   const classes = useStyles();
   let history = useHistory();
 
   const [username, setUsername] = useState(null);
   const [password, setPassword] = useState(null);
-  const [email, setEmail] = useState(null);
+  const [isSignedIn, setIsSignedIn] = useState(false);
 
-  const [signUpSuccess, setSignUpSuccess] = useState(false);
+  const [signInFailMsg, setSignInFailMsg] = useState(null);
 
-  const [signUpFailMsg, setSignUpFailMsg] = useState(null);
+  useEffect(() => {
+    const username = localStorage.getItem("username");
+    if (username) {
+      setIsSignedIn(true);
+    }
+  }, []);
 
   function validateForm() {
-    return validate(username) && validate(password) && validate(email);
+    return validate(username) && validate(password);
   }
 
   function onSubmit(e) {
     e.preventDefault(e);
+
     if (!validateForm()) {
-      setSignUpFailMsg(INVALID_INPUT);
+      setSignInFailMsg(INCORRECT_CREDENTIAL_WARNING);
       return;
     }
-    Axios.post("https://movie-rating-server.herokuapp.com/api/user", {
-      username: username,
-      password: password,
-      emailAddress: email,
-      isAdmin: false,
-    })
+
+    Axios.get(
+      "https://movie-rating-server.herokuapp.com/api/user/" +
+        username +
+        "/" +
+        password
+    )
       .then((response) => {
-        setSignUpSuccess(true);
-      })
-      .catch((error) => {
-        if (error.response.status === 409) {
-          setSignUpFailMsg(USERNAME_ALREADY_USED);
+        if (response.status === 200) {
+          setIsSignedIn(true);
+          localStorage.setItem("username", username);
+          localStorage.setItem("email", response.data.emailAddress);
+          localStorage.setItem("password", response.data.password);
+          localStorage.setItem("isAdmin", response.data.isAdmin);
+        } else {
+          setSignInFailMsg(INCORRECT_CREDENTIAL_WARNING);
         }
-        console.log(error);
-      });
+      })
+      .catch((error) => console.log(error));
     return;
   }
 
-  function toSignInClick(e) {
+  function backToHomeClick(e) {
     e.preventDefault();
-    history.push("/signin");
+    history.push("/");
   }
 
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      {signUpSuccess ? (
+      {isSignedIn ? (
         <div className={classes.paper}>
           <Typography component="h1" variant="h5">
-            Successfully signed up
+            Successfully signed in as {username}
           </Typography>
           <Button
             type="back"
@@ -108,9 +116,9 @@ function SignUp() {
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={(e) => toSignInClick(e)}
+            onClick={(e) => backToHomeClick(e)}
           >
-            Go To Sign In
+            Go To Home
           </Button>
         </div>
       ) : (
@@ -119,7 +127,7 @@ function SignUp() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign up
+            Sign In
           </Typography>
           <form className={classes.form}>
             <Grid container spacing={2}>
@@ -134,23 +142,8 @@ function SignUp() {
                   label="Username"
                   autoFocus
                   onChange={(e) => {
+                    setSignInFailMsg(null);
                     setUsername(String(e.target.value));
-                    setSignUpFailMsg(null);
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  onChange={(e) => {
-                    setEmail(String(e.target.value));
-                    setSignUpFailMsg(null);
                   }}
                 />
               </Grid>
@@ -165,14 +158,14 @@ function SignUp() {
                   id="password"
                   autoComplete="current-password"
                   onChange={(e) => {
+                    setSignInFailMsg(null);
                     setPassword(String(e.target.value));
-                    setSignUpFailMsg(null);
                   }}
                 />
               </Grid>
             </Grid>
-            {signUpFailMsg ? (
-              <Alert severity="error">{signUpFailMsg}</Alert>
+            {signInFailMsg ? (
+              <Alert severity="error">{signInFailMsg}</Alert>
             ) : (
               <></>
             )}
@@ -184,15 +177,15 @@ function SignUp() {
               className={classes.submit}
               onClick={(e) => onSubmit(e)}
             >
-              Sign Up
+              Sign In
             </Button>
             <Grid container justify="flex-end">
               <Grid item>
                 <Link
-                  href="https://web-final-frontend.herokuapp.com/signin"
+                  href="https://web-final-frontend.herokuapp.com/signup"
                   variant="body2"
                 >
-                  Already have an account? Sign in
+                  Don't have an account? Sign up
                 </Link>
               </Grid>
             </Grid>
@@ -206,4 +199,4 @@ function SignUp() {
   );
 }
 
-export default SignUp;
+export default SignIn;
