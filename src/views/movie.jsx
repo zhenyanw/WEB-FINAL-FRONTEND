@@ -111,11 +111,7 @@ function Movie() {
         movieName
     )
       .then((response) => {
-        if (response.status === 200) {
-          setFavorite(true);
-        } else {
-          setFavorite(false);
-        }
+        setFavorite(response.data.message);
       })
       .catch((error) => console.log(error));
   }, []);

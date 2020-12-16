@@ -89,11 +89,12 @@ function SignIn() {
       return;
     }
 
-    Axios.get(
-      "https://movie-rating-server.herokuapp.com/api/user/" +
-        username +
-        "/" +
-        password
+    Axios.post(
+      "https://movie-rating-server.herokuapp.com/api/user/authenticate",
+      {
+        username: username,
+        password: password,
+      }
     )
       .then((response) => {
         if (response.status === 200) {
@@ -102,11 +103,12 @@ function SignIn() {
           localStorage.setItem("email", response.data.emailAddress);
           localStorage.setItem("password", response.data.password);
           localStorage.setItem("isAdmin", response.data.isAdmin);
-        } else {
-          setSignInFailMsg(INCORRECT_CREDENTIAL_WARNING);
         }
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        setSignInFailMsg(INCORRECT_CREDENTIAL_WARNING);
+        console.log(error);
+      });
     return;
   }
 

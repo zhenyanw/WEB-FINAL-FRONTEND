@@ -86,7 +86,7 @@ function SignUp() {
       setSignUpFailMsg(INVALID_INPUT);
       return;
     }
-    Axios.post("https://movie-rating-server.herokuapp.com/api/user", {
+    Axios.post("https://movie-rating-server.herokuapp.com/api/user/signup", {
       username: username,
       password: password,
       emailAddress: email,

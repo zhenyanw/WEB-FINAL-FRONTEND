@@ -7,6 +7,7 @@ import {
   Typography,
   Button,
   IconButton,
+  Link,
 } from "@material-ui/core";
 import SearchBar from "material-ui-search-bar";
 import { useHistory } from "react-router-dom";
@@ -82,7 +83,8 @@ function NavBar() {
     history.push("/movieList" + searchValue);
   }
 
-  function onTitleClick() {
+  function onTitleClick(e) {
+    e.preventDefault();
     history.push("/");
   }
 
@@ -91,7 +93,9 @@ function NavBar() {
       <AppBar position="static" className={classes.appbar}>
         <Toolbar>
           <Typography className={classes.title} variant="h6">
-            Movie Review
+            <Link href="#" onClick={(e) => onTitleClick(e)} color={"inherit"}>
+              Movie Review
+            </Link>
           </Typography>
           <SearchBar
             className={classes.search}
